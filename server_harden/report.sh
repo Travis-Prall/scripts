@@ -1,3 +1,13 @@
+##################################################################################
+#                              Author: Travis Prall                              #
+#                     Creation Date: August 7, 2022 10:40 AM                     #
+#                     Last Updated: August 7, 2022 11:29 AM                      #
+#                          Source Language: shellscript                          #
+#                                                                                #
+#                            --- Code Description ---                            #
+#                          Email Report of Server Stats                          #
+##################################################################################
+
 #!/bin/bash
 
 # Variables

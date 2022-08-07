@@ -1,3 +1,17 @@
+##################################################################################
+#                              Author: Travis Prall                              #
+#                      Creation Date: June 9, 2022 08:46 AM                      #
+#                     Last Updated: August 7, 2022 11:28 AM                      #
+#                          Source Language: shellscript                          #
+#                                                                                #
+#                            --- Code Description ---                            #
+#                          Run and report clamav scans                           #
+##################################################################################
+
+
+
+
+
 #!/bin/bash
 
 
@@ -8,6 +22,9 @@ CLAMAV_LOG_DIR="${LOG_DIR}/clamav"
 CLAM_LOG="${CLAMAV_LOG_DIR}/clamav-$(date +'%Y-%m-%d').log"
 EMAIL_FROM=$(whoami)@$(hostname --long)
 EMAIL_TO=""
+PUA=false
+
+
 
 
 # Making sure this script is run by bash to prevent mishaps
@@ -22,7 +39,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 
-PUA=false
+
 
 
 function clam_scan() {
@@ -44,8 +61,7 @@ function clam_scan() {
 }
 
 function check_scan() {
-    #Check the last set of results. If there are any “Infected" counts that aren’t zero, we have a problem.
-    # email subject
+    #Check the last set of results. If there are any “Infected" counts send an email.
     echo "Checking ClamAV scan results" | tee -a ${REPORT}
     SUBJECT="VIRUS DETECTED ON ${server_name}!!!"
 
