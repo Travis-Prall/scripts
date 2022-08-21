@@ -2,12 +2,13 @@
 ##################################################################################
 #                              Author: Travis Prall                              #
 #                     Creation Date: August 6, 2022 05:19 PM                     #
-#                     Last Updated: August 7, 2022 11:29 AM                      #
+#                     Last Updated: August 21, 2022 11:15 AM                     #
 #                          Source Language: shellscript                          #
 #                                                                                #
 #                            --- Code Description ---                            #
-#                               Preform Maintence                                #
+#                              Preform Maintenance                               #
 ##################################################################################
+
 
 server_name=$(hostname --long)
 UPDATE=false
