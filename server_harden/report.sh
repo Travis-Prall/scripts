@@ -1,3 +1,4 @@
+#!/bin/bash
 ##################################################################################
 #                              Author: Travis Prall                              #
 #                     Creation Date: August 7, 2022 10:40 AM                     #
@@ -7,8 +8,6 @@
 #                            --- Code Description ---                            #
 #                          Email Report of Server Stats                          #
 ##################################################################################
-
-#!/bin/bash
 
 # Variables
 HOST=$(hostname --long)

@@ -1,3 +1,4 @@
+#!/bin/bash
 ##################################################################################
 #                              Author: Travis Prall                              #
 #                     Creation Date: August 6, 2022 05:19 PM                     #
@@ -8,14 +9,6 @@
 #                               Preform Maintence                                #
 ##################################################################################
 
-
-
-
-
-#!/bin/bash
-
-
-
 server_name=$(hostname --long)
 UPDATE=false
 FULL_UPDATE=false
@@ -25,8 +18,6 @@ REBOOT=false
 DOCKER=false
 PIHOLE=false
 RKHUNTER=false
-
-
 
 # Making sure this script is run by bash to prevent mishaps
 if [ "$(ps -p "$$" -o comm=)" != "bash" ]; then
@@ -57,8 +48,6 @@ function full_update() {
     fi
 }
 
-
-
 function check_for_reboot() {
     echo "checking for reboot requirement" > /dev/null
     if [ -f /var/run/reboot-required ]; then
@@ -68,8 +57,6 @@ function check_for_reboot() {
         echo "No reboot required" > /dev/null
     fi
 }
-
-
 
 function clean() {
     echo "Cleaning ${server_name}..." > /dev/null
@@ -95,7 +82,6 @@ function full_clean() {
         docker system prune -af > /dev/null
     fi
 }
-
 
 main() {
     if $UPDATE; then

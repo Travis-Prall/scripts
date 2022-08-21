@@ -1,3 +1,4 @@
+#!/bin/bash
 ##################################################################################
 #                              Author: Travis Prall                              #
 #                      Creation Date: June 9, 2022 08:46 AM                      #
@@ -8,14 +9,6 @@
 #                          Run and report clamav scans                           #
 ##################################################################################
 
-
-
-
-
-#!/bin/bash
-
-
-
 server_name=$(hostname --long)
 LOG_DIR="/var/log"
 CLAMAV_LOG_DIR="${LOG_DIR}/clamav"
@@ -23,9 +16,6 @@ CLAM_LOG="${CLAMAV_LOG_DIR}/clamav-$(date +'%Y-%m-%d').log"
 EMAIL_FROM=$(whoami)@$(hostname --long)
 EMAIL_TO=""
 PUA=false
-
-
-
 
 # Making sure this script is run by bash to prevent mishaps
 if [ "$(ps -p "$$" -o comm=)" != "bash" ]; then
@@ -37,10 +27,6 @@ if [[ $EUID -ne 0 ]]; then
     echo -e "This script must be run as root / with sudo on ${server_name}"
     exit 1
 fi
-
-
-
-
 
 function clam_scan() {
     if dpkg -l clamav >/dev/null; then
@@ -56,7 +42,13 @@ function clam_scan() {
         check_scan
     else
         echo "ClamAV is not installed for ${server_name}" | tee -a ${REPORT}
-        exit 1
+        apt-get install clamav clamav-daemon -y > /dev/null
+        if $PUA; then
+            clamscan -r / --exclude-dir="^/sys" --quiet --infected --detect-pua=yes --log=${CLAM_LOG}
+        else
+            clamscan -r / --exclude-dir="^/sys" --quiet --infected --log=${CLAM_LOG}
+        fi
+        check_scan
     fi
 }
 
@@ -88,7 +80,6 @@ function check_scan() {
     fi
 
 }
-
 
 main() {
     clam_scan
