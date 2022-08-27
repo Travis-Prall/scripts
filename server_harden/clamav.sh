@@ -17,20 +17,9 @@ EMAIL_FROM=$(whoami)@$(hostname --long)
 EMAIL_TO=""
 PUA=false
 
-# Making sure this script is run by bash to prevent mishaps
-if [ "$(ps -p "$$" -o comm=)" != "bash" ]; then
-    bash "$COMMAND" "$ARGS"
-    exit "$?"
-fi
-
-if [[ $EUID -ne 0 ]]; then
-    echo -e "This script must be run as root / with sudo on ${server_name}"
-    exit 1
-fi
-
 function clam_scan() {
     if dpkg -l clamav >/dev/null; then
-        echo "Antivirus version installed: $(freshclam --version)"
+        echo "Antivirus version installed: $(freshclam --version)" > /dev/null
         systemctl stop clamav-freshclam
         freshclam
         systemctl start clamav-freshclam
@@ -87,5 +76,3 @@ main() {
 }
 
 main "$@"
-
-exit 0

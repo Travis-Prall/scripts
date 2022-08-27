@@ -1,12 +1,13 @@
 #!/bin/bash
+
 ##################################################################################
 #                              Author: Travis Prall                              #
 #                     Creation Date: August 7, 2022 10:40 AM                     #
-#                     Last Updated: August 7, 2022 11:29 AM                      #
+#                     Last Updated: August 27, 2022 08:34 AM                     #
 #                          Source Language: shellscript                          #
 #                                                                                #
 #                            --- Code Description ---                            #
-#                          Email Report of Server Stats                          #
+#                               Email Report Stats                               #
 ##################################################################################
 
 # Variables
@@ -16,15 +17,9 @@ EMAIL_TO=""
 EMAIL_SUBJECT="Report for ${HOST}"
 REPORT=/tmp/server_report.html
 
-# Making sure this script is run by bash to prevent mishaps
-if [ "$(ps -p "$$" -o comm=)" != "bash" ]; then
-    bash "$COMMAND" "$ARGS"
-    exit "$?"
-fi
+# Test if report file exsists
+test -f "$REPORT" || touch /tmp/server_report.html
 
-if [[ $EUID -ne 0 ]]; then
-    echo -e "This script must be run as root / with sudo"
-fi
 # A little CSS and table layout to make the report look a little nicer
 echo "<HTML>
 <HEAD>
@@ -44,6 +39,8 @@ border:1px solid black;
 <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
 </HEAD>
 <BODY>" > $REPORT
+
+
 # View hostname and insert it at the top of the html body
 
 echo "Filesystem usage for host <strong>$HOST</strong><br>
@@ -139,7 +136,6 @@ function fail2ban_check() {
     echo "</table><br><br>" >> $REPORT
 }
 
-
 function ufw_check() {
     if dpkg -l ufw >/dev/null; then
       echo "<table border='1'>
@@ -160,7 +156,6 @@ function ufw_check() {
     fi
     echo "</table><br><br>" >> $REPORT
 }
-
 
 function clam_check() {
     if dpkg -l clamav >/dev/null; then
@@ -183,7 +178,6 @@ function clam_check() {
     echo "</table><br><br>" >> $REPORT
 }
 
-
 function rkhunter_check() {
     if dpkg -l rkhunter >/dev/null; then
       echo "<table border='1'>
@@ -204,8 +198,6 @@ function rkhunter_check() {
     fi
     echo "</table><br><br>" >> $REPORT
 }
-
-
 
 function filesystem_usage() {
   echo "<table border='1'>
@@ -231,7 +223,6 @@ function filesystem_usage() {
   echo "</table><br><br>" >> $REPORT
 }
 
-
 function user_installed_packages() {
       echo "<table border='1'>
       <tr><th class='great'>User Installed Packages</td>
@@ -243,8 +234,6 @@ function user_installed_packages() {
       done < <(comm -13 <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort) <(comm -23 <(dpkg-query -W -f='${Package}\n' | sed 1d | sort) <(apt-mark showauto | sort)) )  
 }
 
-
-
 function report() {
 (
   echo "To: ${EMAIL_TO}"
@@ -255,7 +244,6 @@ function report() {
   cat $REPORT
 ) | sendmail -t
 }
-
 
 main() {
     system_info

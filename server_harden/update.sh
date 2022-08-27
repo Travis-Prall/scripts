@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 ##################################################################################
 #                              Author: Travis Prall                              #
 #                     Creation Date: August 6, 2022 05:19 PM                     #
-#                     Last Updated: August 21, 2022 11:15 AM                     #
+#                     Last Updated: August 27, 2022 08:30 AM                     #
 #                          Source Language: shellscript                          #
 #                                                                                #
 #                            --- Code Description ---                            #
-#                              Preform Maintenance                               #
+#                                  Maintenance                                   #
 ##################################################################################
-
 
 server_name=$(hostname --long)
 UPDATE=false
@@ -20,25 +20,14 @@ DOCKER=false
 PIHOLE=false
 RKHUNTER=false
 
-# Making sure this script is run by bash to prevent mishaps
-if [ "$(ps -p "$$" -o comm=)" != "bash" ]; then
-    bash "$COMMAND" "$ARGS"
-    exit "$?"
-fi
-
-if [[ $EUID -ne 0 ]]; then
-    echo -e "This script must be run as root / with sudo"
-fi
-
 function update() {
-    echo "Updating ${server_name}..."
+    echo "Updating ${server_name}..." 2>&1
     apt update -y > /dev/null
     apt upgrade -y > /dev/null
 }
 
-
 function full_update() {
-    echo "Fully Updating ${server_name}..." > /dev/null
+    echo "Fully Updating ${server_name}..." 2>&1
     apt-get update -y > /dev/null
     apt-get dist-upgrade -y > /dev/null
     if $PIHOLE; then
@@ -50,34 +39,34 @@ function full_update() {
 }
 
 function check_for_reboot() {
-    echo "checking for reboot requirement" > /dev/null
+    echo "checking if reboot requirement" 2>&1
     if [ -f /var/run/reboot-required ]; then
-        echo "REBOOT REQUIRED, sheduled for 4:30" > /dev/null
-        shutdown -r 7:30 2>&1
+        echo "REBOOT REQUIRED, sheduled for 4:30" 2>&1
+        shutdown -r 4:30 > /dev/null
     else
-        echo "No reboot required" > /dev/null
+        echo "No reboot required" 2>&1
     fi
 }
 
-function clean() {
-    echo "Cleaning ${server_name}..." > /dev/null
-    echo "Removing Old Kernels . . ." > /dev/null
+function maint_clean() {
+    echo "Cleaning ${server_name}..." 2>&1
+    echo "Removing Old Kernels . . ." 2>&1
     apt-get -y --purge autoremove > /dev/null
     apt-get autoclean -y > /dev/null
     apt-get -y clean > /dev/null
 }
 
 function full_clean() {
-    echo "Fully Cleaning ${server_name}..." > /dev/null
-    echo "Removing old Dynamic Kernel Module Support (DKMS) . . ." > /dev/null
+    echo "Fully Cleaning ${server_name}..." 2>&1
+    echo "Removing old Dynamic Kernel Module Support (DKMS) . . ." 2>&1
     rm -v /boot/*.old-dkms > /dev/null
-    echo "Cleaning up the GRUB Boot Menu . . ." > /dev/null
+    echo "Cleaning up the GRUB Boot Menu . . ." 2>&1
     update-grub > /dev/null
-    echo "Clearing all Cache Memory . . ." > /dev/null
+    echo "Clearing all Cache Memory . . ." 2>&1
     rm -rfv ~/.cache/*
-    echo "Clearing all Logs . . ." > /dev/null
+    echo "Clearing all Logs . . ." 2>&1
     journalctl --vacuum-time=28d
-    echo "Clearing Trash . . ." > /dev/null
+    echo "Clearing Trash . . ." 2>&1
     rm -rf ~/.local/share/Trash/*
     if $DOCKER; then
         docker system prune -af > /dev/null
@@ -90,20 +79,17 @@ main() {
     elif $FULL_UPDATE; then
         full_update
     else
-        echo "No updates" >/dev/null
+        echo "No updates" 2>&1
     fi
 
     if $CLEAN; then
-        echo "Cleaning" >/dev/null
-        clean
+        maint_clean
     fi
     if $FULL_CLEAN; then
-        echo "Cleaning" >/dev/null
         full_clean
     fi
     if $REBOOT; then
-        echo "Checking for Reboot" >/dev/null
-        reboot
+        check_for_reboot
     fi
 
 }
