@@ -11,6 +11,7 @@
 ##################################################################################
 
 server_name=$(hostname --long)
+reboot_time=6:00
 UPDATE=false
 FULL_UPDATE=false
 CLEAN=false
@@ -22,27 +23,28 @@ RKHUNTER=false
 
 function update() {
     echo "Updating ${server_name}..." 2>&1
-    apt update -y > /dev/null
-    apt upgrade -y > /dev/null
+    apt-get update -y >/dev/null
+    apt-get upgrade -y >/dev/null
+    echo "Update Commplete" 2>&1
 }
 
 function full_update() {
     echo "Fully Updating ${server_name}..." 2>&1
-    apt-get update -y > /dev/null
-    apt-get dist-upgrade -y > /dev/null
+    apt-get update -y >/dev/null
+    apt-get dist-upgrade -y >/dev/null
     if $PIHOLE; then
-        pihole -up > /dev/null
+        pihole -up >/dev/null
     fi
     if $RKHUNTER; then
-        rkhunter --propupd > /dev/null
+        rkhunter --propupd >/dev/null
     fi
 }
 
 function check_for_reboot() {
     echo "checking if reboot requirement" 2>&1
     if [ -f /var/run/reboot-required ]; then
-        echo "REBOOT REQUIRED, sheduled for 4:30" 2>&1
-        shutdown -r 4:30 > /dev/null
+        echo "REBOOT REQUIRED, sheduled for $reboot_time" 2>&1
+        shutdown -r $reboot_time >/dev/null
     else
         echo "No reboot required" 2>&1
     fi
@@ -51,17 +53,18 @@ function check_for_reboot() {
 function maint_clean() {
     echo "Cleaning ${server_name}..." 2>&1
     echo "Removing Old Kernels . . ." 2>&1
-    apt-get -y --purge autoremove > /dev/null
-    apt-get autoclean -y > /dev/null
-    apt-get -y clean > /dev/null
+    apt-get -y --purge autoremove >/dev/null
+    apt-get autoclean -y >/dev/null
+    apt-get -y clean >/dev/null
+    echo "Cleaning Complete" 2>&1
 }
 
 function full_clean() {
     echo "Fully Cleaning ${server_name}..." 2>&1
     echo "Removing old Dynamic Kernel Module Support (DKMS) . . ." 2>&1
-    rm -v /boot/*.old-dkms > /dev/null
+    rm -v /boot/*.old-dkms >/dev/null
     echo "Cleaning up the GRUB Boot Menu . . ." 2>&1
-    update-grub > /dev/null
+    update-grub >/dev/null
     echo "Clearing all Cache Memory . . ." 2>&1
     rm -rfv ~/.cache/*
     echo "Clearing all Logs . . ." 2>&1
@@ -69,11 +72,14 @@ function full_clean() {
     echo "Clearing Trash . . ." 2>&1
     rm -rf ~/.local/share/Trash/*
     if $DOCKER; then
-        docker system prune -af > /dev/null
+        echo "Cleaning Docker" 2>&1
+        docker system prune -af >/dev/null
     fi
+    echo "Cleaning Complete" 2>&1
 }
 
 main() {
+    echo "Starting Maintenance" 2>&1
     if $UPDATE; then
         update
     elif $FULL_UPDATE; then
@@ -91,7 +97,7 @@ main() {
     if $REBOOT; then
         check_for_reboot
     fi
-
+    echo "Maintenance Complete" 2>&1
 }
 
 main "$@"
