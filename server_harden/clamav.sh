@@ -1,4 +1,5 @@
 #!/bin/bash
+
 ##################################################################################
 #                              Author: Travis Prall                              #
 #                      Creation Date: June 9, 2022 08:46 AM                      #
@@ -57,8 +58,8 @@ border:1px solid black;
 </HEAD>
 <BODY>" >"$REPORT"
 
-echo "<h1>Virus scan for $HOST</h1>
-PUA: $PUA<br>" >"$REPORT"
+echo "<h1>Virus scan for ${server_name}</h1>
+<h4>PUA: ${PUA}</h4>" >>"$REPORT"
 
 function clam_scan() {
     if dpkg -l clamav >/dev/null; then
@@ -85,16 +86,13 @@ function clam_scan() {
 }
 
 function format_log() {
-    echo "<table border='1' style='width:100%'>
-      <tr><th class='bad'>Virus</th>
-      </tr>" >>"$REPORT"
     while read -r line; do
         {
             echo "<tr><td align='left'>"
             echo "$line"
             echo "</td></tr>"
         } >>"$REPORT"
-    done < <(${CLAM_LOG})
+    done < <(cat "${CLAM_LOG}")
 }
 
 function check_scan() {
@@ -102,6 +100,9 @@ function check_scan() {
     echo "Checking ClamAV scan results" 2>&1
 
     if [ $(tail -n 12 "${CLAM_LOG}" | grep Infected | grep -v 0 | wc -l) != 0 ]; then
+        echo "<table border='1' style='width:100%'>
+            <tr><th class='bad'>Virus Found</th>
+            </tr>" >>"$REPORT"
         format_log
         (
             echo "To: ${EMAIL_TO}"
@@ -119,6 +120,10 @@ function check_scan() {
             cat "$REPORT"
         ) | sendmail -t
     else
+        echo "<table border='1' style='width:100%'>
+            <tr><th class='great'>No Virus</th>
+            </tr>" >>"$REPORT"
+        format_log
         (
             echo "To: ${EMAIL_TO}"
 
@@ -126,7 +131,7 @@ function check_scan() {
 
             echo "Content-Type: text/html;"
 
-            echo "Subject: No virus on ${server_name}!!!"
+            echo "Subject: No virus on ${server_name}"
 
             cat "$REPORT"
         ) | sendmail -t
