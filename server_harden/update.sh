@@ -14,6 +14,7 @@ server_name=$(hostname --long)
 reboot_time=6:00
 UPDATE=false
 FULL_UPDATE=false
+DRIVERS=true
 CLEAN=false
 FULL_CLEAN=false
 REBOOT=false
@@ -32,6 +33,9 @@ function full_update() {
     echo "Fully Updating ${server_name}..." 2>&1
     apt-get update -y >/dev/null
     apt-get dist-upgrade -y >/dev/null
+    if $DRIVERS; then
+        update_drivers
+    fi
     if $PIHOLE; then
         pihole -up >/dev/null
     fi
@@ -39,6 +43,16 @@ function full_update() {
         rkhunter --propupd >/dev/null
     fi
 }
+
+
+function update_drivers() {
+    echo "Updating drivers" 2>&1
+    ubuntu-drivers autoinstall >/dev/null
+    echo "Drivers Updated" 2>&1
+    
+    }
+
+
 
 function check_for_reboot() {
     echo "checking if reboot requirement" 2>&1
